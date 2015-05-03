@@ -1,0 +1,12 @@
+
+<li class="athlete column">
+	{% if results.premium %}
+		<div class="premium"></div>
+	{% endif %}
+	<img class="round" src="{{results.profile}}" />
+	<h4>{{results.name}}</h4>
+	<p>{{results.location}}</p>
+	<a class="button radius info tiny" href="http://strava.com/athletes/{{results.id}}">View profile</a>
+</li>
+	
+

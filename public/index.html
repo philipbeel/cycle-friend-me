@@ -1,0 +1,92 @@
+<!doctype html>
+<!--[if IE 9]><html class="lt-ie10" lang="en" > <![endif]-->
+<html class="no-js" lang="en" data-useragent="Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.2; Trident/6.0)">
+
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Strava Friend Finder</title>
+	<meta name="description" content="Strava Route finder app" />
+	<meta name="author" content="Philip Beel theodin.co.uk https://github.com/philipbeel/strava-route-finder" />
+	<link rel="stylesheet" href="css/foundation.css" />
+	<link rel="stylesheet" href="css/app.css" />
+	<link rel="shortcut icon" href="assets/favicon.ico" />
+	<script src="js/modernizer.js"></script>
+</head>
+
+<body>
+	<!-- About Modal -->
+	<div id="aboutModal" class="reveal-modal" data-reveal aria-labelledby="modalTitle" aria-hidden="true" role="dialog">
+		<h2 id="modalTitle">About Strava friend finder</h2>
+		<p class="lead">What is it and why should I care?</p>
+		<p>Strava friend finder allows athletes to find active Strava users nearby. Moving somewhere new can be exciting, but also, at times, tedious. Use Strava friend finder to follow new people and explore new routes.</p>
+		<p>To use, simply enter your Strava ID and hit find. </p>
+		<p><strong>Please note:</strong> You must enter your location on Strava to use this tool.</p>
+
+		<a class="close-reveal-modal" aria-label="Close">&#215;</a>
+	</div>
+
+	<div class="row">
+		<div class="nav-bar">
+			<div class="small-12 medium-4 large-6 columns namelogo">
+				<div class="logo"></div>
+			</div>
+			<div class="nav-bar right show-for-medium-up">
+				<ul class="button-group">
+					<li><a href="#" class="button about" data-reveal-id="aboutModal">About</a></li>
+				</ul>
+			</div>
+		</div>
+
+
+
+	</div>
+	<div class="hero">
+		<div class="row">
+			<div class="large-12 columns intro-text">
+			</div>
+		</div>
+		<div class="row">
+			<div class="finder large-12 columns">
+				<h1>Find friends. Discover routes.</h1>
+				<form name="routeFinder" id="routeFinder" method="get" action="#">
+					<div class="row collapse">
+						<div class="large-10 columns">
+							<input value="" class="friend-search" id="athleteId" type="text" placeholder="Your Strava athlete ID">
+						</div>
+						<div class="large-2 columns">
+							<input type="submit" id="find" class="button postfix" value="FIND"/>
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+
+	</div>
+	<footer class="row">
+		<div class="large-12 columns">
+			<a id="athletes"></a>
+			<div class="row results" id="results" >
+
+			<div id="loading" class="spinner">
+				<div class="dot1"></div>
+				<div class="dot2"></div>
+			</div>
+			
+			<h2 id="totals"></h2>
+
+			<ul id="friends" class="small-block-grid-1 medium-block-grid-3 large-block-grid-3"></ul>
+				<!-- Results to be loaded here -->
+			</div>
+
+			<div id="error"></div>
+		</div>
+	</footer>
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>	
+	<script src="js/foundation.js"></script>
+	<script src="js/foundation.reveal.js"></script>
+	<script src="js/socket.io.js"></script>
+	<script src="js/app.js"></script>
+</body>
+
+</html>

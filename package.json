@@ -1,0 +1,32 @@
+{
+  "name": "strava-route-finder",
+  "version": "1.0.0",
+  "description": "Seraches for cycle routes near a strava user",
+  "author": "Philip Beel",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.12.3",
+    "open": "^0.0.5",
+    "request": "^2.55.0",
+    "strava-v3": "^1.7.0",
+    "swig": "^1.4.2"
+  },
+  "main": "strava.js",
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/philipbeel/strava-route-finder.git"
+  },
+  "keywords": [
+    "strava",
+    "javascript",
+    "API"
+  ],
+  "bugs": {
+    "url": "https://github.com/philipbeel/strava-route-finder/issues"
+  },
+  "homepage": "https://github.com/philipbeel/strava-route-finder"
+}

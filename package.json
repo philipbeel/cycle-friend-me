@@ -1,14 +1,14 @@
 {
   "name": "strava-route-finder",
   "version": "1.0.0",
-  "description": "Seraches for cycle routes near a strava user",
+  "description": "Find Strava athletes that live nearby",
   "author": "Philip Beel",
   "license": "MIT",
   "dependencies": {
-    "express": "^4.12.3",
-    "open": "^0.0.5",
-    "request": "^2.55.0",
     "strava-v3": "^1.7.0",
+    "express": "^4.12.3",
+    "socket.io": "^1.3.5",
+    "request": "^2.55.0",
     "swig": "^1.4.2"
   },
   "main": "strava.js",
@@ -18,7 +18,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/philipbeel/strava-route-finder.git"
+    "url": "https://github.com/philipbeel/strava-friend-finder.git"
   },
   "keywords": [
     "strava",
@@ -26,7 +26,7 @@
     "API"
   ],
   "bugs": {
-    "url": "https://github.com/philipbeel/strava-route-finder/issues"
+    "url": "https://github.com/philipbeel/strava-friend-finder/issues"
   },
-  "homepage": "https://github.com/philipbeel/strava-route-finder"
+  "homepage": "https://github.com/philipbeel/strava-friend-finder"
 }

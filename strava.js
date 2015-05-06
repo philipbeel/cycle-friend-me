@@ -13,9 +13,6 @@ var athleteFriends=[];
 var totalMatchedAthletes = 0;
 var friends = [];
 var city;
-var server;
-var response;
-var readyToDisplayResults = false;
 var nodeSocket;
 
 app.engine('html', swig.renderFile);
@@ -24,7 +21,6 @@ app.set('views', __dirname + '/templates');
 app.set('view cache', false);
 
 swig.setDefaults({ cache: false });
-
 
 app.use('/', express.static(__dirname + '/public'));
 
@@ -41,11 +37,23 @@ io.on('connection', function (socket) {
 		nodeSocket = socket;
 		athleteId = data;
 
-		console.log("::: athleteID ", data);
+		prepareForSearch();
+
 		storeAthletesFriends(getAthleteLocationFromId);
 	});
 });
 
+/**
+ * @description Squares away any previous search info that 
+ * could skew new result sets
+ */
+function prepareForSearch () {
+	athletesCloseBy = [];
+	athleteFriends = [];
+	totalMatchedAthletes = 0;
+	friends = [];
+	city;
+}
 
 /**
  * @description collect all the friends of an athlete
@@ -110,8 +118,6 @@ function getAthleteLocationFromId() {
  * @returns {object} the lat and long of SE, NW
  */
 function apiRequestWithinRateLimit (payload) {
-
-	console.log("::: apiRequestWithinRateLimit");
 
 	if(payload && payload.message === "Rate Limit Exceeded") {
 		renderErrorResponse("Stravas API rate limit has been exceeded, check back in 15 minutes and try again.");
@@ -253,7 +259,7 @@ function filterAthletesBasedOnAddress (athleteIdentifier) {
 		    		if(athleteCity.replace("'","") === city.toLowerCase().replace("'","")) {
 
 						var fullName = payload.firstname +" "+ payload.lastname;
-						var location = athleteCity + ", "+ payload.state;
+						var location = cleanLocation(athleteCity, payload.state);
 						var picture = payload.profile;
 
 						totalMatchedAthletes += 1;
@@ -276,6 +282,21 @@ function filterAthletesBasedOnAddress (athleteIdentifier) {
 	}
 }
 
+/**
+ * @description Cleans up the display location for an athlete
+ *
+ * @param {string} city
+ * @param {string} state
+ */
+function cleanLocation(city, state) {
+	return city.replace('+', ' ') + ' ' +state.replace('+', ' ');
+}
+
+/**
+ * @description Returns an updated title string including totals counts
+ *
+ * @param {integer} total
+ */
 function updateTotals(total) {
 	var plural = (total > 1) ? 's': '';
 	var heading = "Found " + total + " athlete" + plural +" nearby";
@@ -305,6 +326,8 @@ function renderFriend (friend) {
 /**
  * @description render an error handler response
  * back to the app
+ *
+ * @param {string} error information pertaining to the failure
  */
 function renderErrorResponse (error) {
 	console.log(error);
@@ -316,8 +339,6 @@ function renderErrorResponse (error) {
 		description: explain,
 		error: errorDescription
 	});
-
-	response.send(tpl);
 
 	io.emit('error', {
 		html: tpl

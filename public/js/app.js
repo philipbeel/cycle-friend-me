@@ -51,6 +51,7 @@ jQuery(function(){
 		},
 
 		prepareSearch: function () {
+			$("#error").empty();
 			$("#totals").empty();
 			$("#friends").empty();
 

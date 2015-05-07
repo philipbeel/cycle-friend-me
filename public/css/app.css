@@ -130,7 +130,7 @@ footer p, footer a {
 }
 
 .logo {
-	background: url("../assets/brand.png");
+	background: url("../assets/brand.png") no-repeat;
 	width: 387px;
 	height: 44px;
 	margin: 10px 0;
@@ -138,11 +138,19 @@ footer p, footer a {
 
 .hero {
 	padding-bottom: 50px;
-	background-image: url("../assets/hero.jpg");
+	background-image: url("../assets/hero-alt.jpg");
+	/*background-image: url("../assets/hero.jpg");*/
 	background-size: cover;
 	background-position: center;
 	height: 500px;
 }
+
+::selection {
+  background-color: #fc4c02;
+  color: #fff;
+  text-shadow: none;
+}	
+
 
 .button.postfix {
 	background: #fc4c02;
@@ -223,8 +231,24 @@ footer p, footer a {
 	right: 30%;
 }
 
-/* Spinner */
+#error .error-panel {
+	background: #FFF;
+	position: relative;
+	min-height: 260px;
+}
 
+#error h2, #error p {
+	position: relative;
+	z-index: 99;
+}
+
+#error .fail {
+	position: absolute;
+	right: 0px;
+	bottom: 0px;
+}
+
+/* Spinner */
 .spinner {
 	display: none;
 	margin: 100px auto;
@@ -286,6 +310,14 @@ footer p, footer a {
 @media only screen and (max-width: 40em) { 
 	.finder {
 		margin: 0px 0;
+	}
+
+	.results .athlete .premium {
+		right: 38%;
+	}
+
+	#error {
+		margin: 20px 0 0 0;
 	}
 } 
 

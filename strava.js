@@ -61,24 +61,40 @@ function prepareForSearch () {
  *
  * @param  {integer} ID
  */
-function storeAthletesFriends(callback) {
+function storeAthletesFriends (callback) {
 
 	strava.athletes.listFriends({
 		"id": athleteId
 		},function(err, payload) {
 		if(!err && apiRequestWithinRateLimit(payload)) {
 
-			console.log("::: storeAthletesFriends callback");
+			if(athleteWasFound(payload)) {
+				payload.forEach(function (athlete, index) {
+					athleteFriends.push(athlete.id);
+				});
 
-			payload.forEach(function (athlete, index) {
-				athleteFriends.push(athlete.id);
-			});
+				callback();
 
-			callback();
+			} else {
+		   		renderErrorResponse('Athlete was not found on Strava');
+			}
+			console.log("::: storeAthletesFriends callback", payload);
+
 		} else {
 		   renderErrorResponse(err);
 		}
 	});
+}
+
+/**
+ * @description For an athlete ID check against Strava that they exist
+ *
+ * @param  {boolean} result
+ */
+function athleteWasFound (response) {
+	var result = response && response.message || null;
+
+	return (result === 'Record Not Found') ? false : true ; 
 }
 
 /**
@@ -235,13 +251,13 @@ function lookupAthletesForSpecifiedSegment (segmentId) {
  */
 function filterAthletesBasedOnAddress (athleteIdentifier) {
 
-	console.log("::: filterAthletesBasedOnAddress", athleteIdentifier);
+	console.log("::: filterAthletesBasedOnAddress", athleteIdentifier, athleteId);
 
 	if(athleteIdentifier) {
 		// Remove duplicate athletes
 		if(athletesCloseBy.indexOf(athleteIdentifier) !== -1 ||
 			athleteFriends.indexOf(athleteId) !== -1 ||
-		 	athleteIdentifier === athleteId) {
+		 	athleteIdentifier == athleteId) {
 
 			return false;
 		}
@@ -289,7 +305,10 @@ function filterAthletesBasedOnAddress (athleteIdentifier) {
  * @param {string} state
  */
 function cleanLocation(city, state) {
-	return city.replace('+', ' ') + ' ' +state.replace('+', ' ');
+	var cleanCity = city && city.replace('+', ' ') || '';
+	var cleanState = state && state.replace('+', ' ') || '';
+
+	return cleanCity + ' ' + cleanState;	
 }
 
 /**
@@ -331,8 +350,7 @@ function renderFriend (friend) {
  */
 function renderErrorResponse (error) {
 	console.log(error);
-	var heading = "Oh dear, something went wrong";
-	var explain = "We were unable to find friends because:";
+	var heading = "Something went wrong";
 	var errorDescription = error;
 	var tpl = swig.renderFile(__dirname + '/templates/error.html', {
 		title: heading,

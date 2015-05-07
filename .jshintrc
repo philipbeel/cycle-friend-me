@@ -1,0 +1,30 @@
+{
+    "bitwise": true,
+    "browser": true,
+    "curly": true,
+    "devel": true,
+    "eqeqeq": true,
+    "forin": true,
+    "funcscope": true,
+    "globals": {
+        "require": false,
+        "define": false,
+        "WebKitCSSMatrix": true
+    },
+    "globalstrict": true,
+    "immed": true,
+    "latedef": true,
+    "maxlen": 0,
+    "newcap": true,
+    "noarg": true,
+    "nomen": true,
+    "nonew": true,
+    "nonstandard": true,
+    "plusplus": false,
+    "regexp": true,
+    "strict": false,
+    "trailing": true,
+    "undef": true,
+    "white": true,
+    "jasmine": true
+}

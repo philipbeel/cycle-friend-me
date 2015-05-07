@@ -5,7 +5,7 @@ jQuery(function(){
 	socket.on('result', function (data) {
 		strava.hideLoader();
 		$("#friends").append(data.html);
-	});  
+	});
 
 	socket.on('update', function (data) {
 		$("#totals").html(data.html);
@@ -75,7 +75,7 @@ jQuery(function(){
 		getRoutes: function (athleteId) {
 			socket.emit('athlete', athleteId);
 		}
-	}
+	};
 
 	// In the words of Mario, let's a go!!
 	strava.init();

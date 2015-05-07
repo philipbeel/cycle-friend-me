@@ -12,7 +12,7 @@ var athletesCloseBy = [];
 var athleteFriends=[];
 var totalMatchedAthletes = 0;
 var friends = [];
-var city;
+var city = null;
 var nodeSocket;
 
 app.engine('html', swig.renderFile);
@@ -44,7 +44,7 @@ io.on('connection', function (socket) {
 });
 
 /**
- * @description Squares away any previous search info that 
+ * @description Squares away any previous search info that
  * could skew new result sets
  */
 function prepareForSearch () {
@@ -52,7 +52,7 @@ function prepareForSearch () {
 	athleteFriends = [];
 	totalMatchedAthletes = 0;
 	friends = [];
-	city;
+	city = null;
 }
 
 /**
@@ -153,7 +153,7 @@ function getCoordinatesFromGeoLocation (location) {
 	} else {
 		request('http://maps.google.com/maps/api/geocode/json?address='+city.toLowerCase()+'+'+geoState.toLowerCase()+'+'+geoCountry.toLowerCase(),
 			function (error, response, body) {
-			if (!error && response.statusCode == 200) {
+			if (!error && response.statusCode === 200) {
 
 				var resp = JSON.parse(body);
 				var result = resp && resp.results && resp.results[0] && resp.results[0].geometry && resp.results[0].geometry.viewport || null;
@@ -241,7 +241,7 @@ function filterAthletesBasedOnAddress (athleteIdentifier) {
 		// Remove duplicate athletes
 		if(athletesCloseBy.indexOf(athleteIdentifier) !== -1 ||
 			athleteFriends.indexOf(athleteId) !== -1 ||
-		 	athleteIdentifier == athleteId) {
+		 	athleteIdentifier === athleteId) {
 
 			return false;
 		}

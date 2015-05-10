@@ -354,7 +354,6 @@ function renderErrorResponse (error) {
 	var errorDescription = error;
 	var tpl = swig.renderFile(__dirname + '/templates/error.html', {
 		title: heading,
-		description: explain,
 		error: errorDescription
 	});
 

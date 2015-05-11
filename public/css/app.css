@@ -231,6 +231,10 @@ footer p, footer a {
 	right: 30%;
 }
 
+#error {
+	margin: 10px 0;
+}
+
 #error .error-panel {
 	background: #FFF;
 	position: relative;

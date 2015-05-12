@@ -13,7 +13,7 @@ var athleteFriends=[];
 var totalMatchedAthletes = 0;
 var friends = [];
 var city = null;
-var nodeSocket;
+var socketId;
 
 app.engine('html', swig.renderFile);
 app.set('view engine', 'html');
@@ -34,7 +34,7 @@ server.listen(8088, function () {
 io.on('connection', function (socket) {
 
 	socket.on('athlete', function (data) {
-		nodeSocket = socket;
+		socketId = socket.id;
 		athleteId = data;
 
 		prepareForSearch();
@@ -78,7 +78,7 @@ function storeAthletesFriends (callback) {
 			} else {
 		   		renderErrorResponse('Athlete was not found on Strava');
 			}
-			console.log("::: storeAthletesFriends callback", payload);
+			console.log("::: storeAthletesFriends");
 
 		} else {
 		   renderErrorResponse(err);
@@ -251,8 +251,6 @@ function lookupAthletesForSpecifiedSegment (segmentId) {
  */
 function filterAthletesBasedOnAddress (athleteIdentifier) {
 
-	console.log("::: filterAthletesBasedOnAddress", athleteIdentifier, athleteId);
-
 	if(athleteIdentifier) {
 		// Remove duplicate athletes
 		if(athletesCloseBy.indexOf(athleteIdentifier) !== -1 ||
@@ -320,7 +318,7 @@ function updateTotals(total) {
 	var plural = (total > 1) ? 's': '';
 	var heading = "Found " + total + " athlete" + plural +" nearby";
 
-	io.emit('update', {
+	io.to(socketId).emit('update', {
 		html: heading
 	});
 }
@@ -337,7 +335,8 @@ function renderFriend (friend) {
 		results: friend
 	});
 
-	io.emit('result', {
+
+	io.to(socketId).emit('result', {
 		html: tpl
 	});
 }

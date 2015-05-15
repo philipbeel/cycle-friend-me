@@ -1,5 +1,8 @@
 ### Strava Friend Finder
 
+App  : http://www.stravafriend.me<br/>
+Twitter : @philipbeel<br/>
+
 #### Description
 *Strava friend finder* Helps you find athletes and discover routes where you live.
 

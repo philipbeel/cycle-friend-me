@@ -130,7 +130,7 @@ footer p, footer a {
 }
 
 .logo {
-	background: url("../assets/brand.png") no-repeat;
+	background: url("https://s3.amazonaws.com/stravafriendfinder/brand.png") no-repeat;
 	width: 387px;
 	height: 44px;
 	margin: 10px 0;
@@ -138,8 +138,7 @@ footer p, footer a {
 
 .hero {
 	padding-bottom: 50px;
-	background-image: url("../assets/hero-alt.jpg");
-	/*background-image: url("../assets/hero.jpg");*/
+	background-image: url("https://s3.amazonaws.com/stravafriendfinder/hero.jpg");
 	background-size: cover;
 	background-position: center;
 	height: 500px;
@@ -229,7 +228,7 @@ footer p, footer a {
 }
 
 .results .athlete .premium {
-	background: url("../assets/premium-badge.png");
+	background: url("https://s3.amazonaws.com/stravafriendfinder/premium-badge.png");
 	width: 35px;
 	height: 40px;
 	position: absolute;

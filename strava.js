@@ -280,6 +280,7 @@ function filterAthletesBasedOnAddress (athleteIdentifier) {
 
 						totalMatchedAthletes += 1;
 						updateTotals(totalMatchedAthletes);
+						renderAdvert(totalMatchedAthletes);
 
 						renderFriend({
 							"id": payload.id,
@@ -340,6 +341,26 @@ function renderFriend (friend) {
 	io.emit('result', {
 		html: tpl
 	});
+}
+
+/**
+ * @description renders an advert into the result set, on the following conditions:
+ * - Results must have been retured
+ * - No adverts have already been displayed
+ *
+ * @param {Integer} count number of athletes added to DOM 
+ *
+ */
+function renderAdvert (count) {
+
+	if(count % 11 == 0) {
+		var tpl = swig.renderFile(__dirname + '/templates/advert.html');
+
+		io.emit('result', {
+			html: tpl
+		});
+	}
+
 }
 
 /**

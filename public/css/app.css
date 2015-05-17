@@ -223,6 +223,11 @@ footer p, footer a {
 	text-align: center;
 }
 
+.results .advert.athlete {
+	padding: 35px 10px;
+	text-align: center;
+}
+
 .results .athlete .premium {
 	background: url("../assets/premium-badge.png");
 	width: 35px;

@@ -59,6 +59,7 @@ jQuery(function(){
 		},
 
 		showLoader: function () {
+			$('#results').css({'minHeight': '500px'});
 			$("#loading").show();
 		},
 

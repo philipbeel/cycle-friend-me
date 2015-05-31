@@ -5,97 +5,77 @@
 <head>
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-	<title>Strava Friend Finder</title>
-	<meta name="description" content="Find friends and discover routes on Strava" />
+	<title>Cycle Friend Finder</title>
+	<meta name="description" content="Find friends and discover routes on Strava with Cycle Friend Finder" />
 	<meta name="author" content="Philip Beel theodin.co.uk" />
 
 	<!-- fb meta -->
-	<meta property="og:title" content="Strava Friend Finder" />
+	<meta property="og:title" content="Cycle Friend Finder" />
 	<meta property="og:type" content="website" />
-	<meta property="og:url" content="http://www.stravafriend.me" />
+	<meta property="og:url" content="http://www.cyclefriend.me" />
 	<meta property="og:image" content="https://s3.amazonaws.com/stravafriendfinder/hero.jpg" />
 	<meta property="og:description" content="Find friends on Strava"/>
 
 	<!-- twitter meta -->
 	<meta name="twitter:card" content="summary_large_image">
 	<meta name="twitter:creator" content="@philipbeel">
-	<meta name="twitter:title" content="Strava Friend Finder">
+	<meta name="twitter:title" content="Cycle Friend Finder">
 	<meta name="twitter:description" content=" by @philipbeel">
 	<meta name="twitter:image" content="https://s3.amazonaws.com/stravafriendfinder/hero.jpg">
 
 	<link rel="stylesheet" href="css/foundation.css" />
 	<link rel="stylesheet" href="css/app.css" />
+	<link href='http://fonts.googleapis.com/css?family=Oswald:400,700,300' rel='stylesheet' type='text/css'>
 	<link rel="shortcut icon" href="https://s3.amazonaws.com/stravafriendfinder/favicon.ico" />
 
 	<script src="js/modernizer.js"></script>
 </head>
 
 <body>
-	<!-- About Modal -->
-	<div id="aboutModal" class="reveal-modal" data-reveal aria-labelledby="modalTitle" aria-hidden="true" role="dialog">
-		<h2 id="modalTitle">About Strava friend finder</h2>
-		<p class="lead">What is it and why should I care?</p>
-		<p>Strava friend finder allows athletes to find active Strava users nearby. Moving somewhere new can be exciting, but also, at times, tedious. Use Strava friend finder to follow new people and explore new routes.</p>
-		<p>To use, simply enter your Strava ID and hit find. </p>
-		<p><strong>Please note:</strong> You must enter your location on Strava to use this tool.</p>
-		<p>You can contribute to this project <a href="https://github.com/philipbeel/strava-friend-finder" title="github">on github</a>.</p>
 
-		<p>Created by <a href="http://twitter.com/philipbeel" title="github">@philipbeel</a>.</p>
-
-		<a class="close-reveal-modal" aria-label="Close">&#215;</a>
-	</div>
-
-	<div class="row">
-		<div class="nav-bar">
-			<div class="small-12 medium-4 large-6 columns namelogo">
-				<div class="logo"></div>
-			</div>
-			<div class="nav-bar right show-for-medium-up">
-				<ul class="button-group">
-					<li><a href="#" class="button about" data-reveal-id="aboutModal">About</a></li>
-				</ul>
-			</div>
-		</div>
-
-
-
+	<div class="row topper">
 	</div>
 	<div class="hero">
-		<div class="row">
-			<div class="large-12 columns intro-text">
+		<div class="shutter">
+			<div class="row">
+				<div class="large-12 columns intro-text">
+				</div>
 			</div>
-		</div>
 
-		<div class="row">
-			<div class="finder large-12 columns">
-				<h1>Find friends. Discover routes.</h1>
-				<form name="routeFinder" id="routeFinder" method="get" action="#">
-					<div class="row collapse">
-						<div class="large-10 columns">
-							<input value="" class="friend-search" id="athleteId" type="text" placeholder="Your Strava athlete ID">
+			<div class="row">
+				<div class="finder large-12 columns">
+					<h1 class="logo">CYCLE FRIEND</h1>
+					<p class="supporting">Find friends. Discover routes.<br />
+						Enter your Strava ID, as it appears in the URL bar at this address:<br />
+					<strong><a href="http://strava.com/me">http://strava.com/me</a></strong></p>
+					<form name="routeFinder" id="routeFinder" method="get" action="#">
+						<div class="row collapse">
+							<div class="large-offset-1 large-8 columns">
+								<input value="" class="friend-search" id="athleteId" type="text" placeholder="Your Strava athlete ID">
+							</div>
+							<div class="large-2 columns end">
+								<input type="submit" id="find" class="button postfix" value="FIND FRIENDS"/>
+							</div>
 						</div>
-						<div class="large-2 columns">
-							<input type="submit" id="find" class="button postfix" value="FIND"/>
-						</div>
-					</div>
-				</form>
+					</form>
+				</div>
 			</div>
-		</div>
 
+		</div>
 	</div>
-	<footer class="row">
+	<div class="row">
 		<div class="large-12 columns">
 			<a id="athletes"></a>
 
 			<div id="error"></div>
-			
+
 			<div class="row results" id="results" >
 
 			<div id="loading" class="spinner">
 				<div class="dot1"></div>
 				<div class="dot2"></div>
 			</div>
-			
+
 			<h2 id="totals"></h2>
 
 			<ul id="friends" class="small-block-grid-1 medium-block-grid-3 large-block-grid-3"></ul>
@@ -103,58 +83,60 @@
 			</div>
 
 		</div>
-    <div class="share-container">
-      <!-- Buttons start here. Copy this ul to your document. -->
-      <ul class="rrssb-buttons">
-        <li class="rrssb-github">
-          <a href="https://github.com/philipbeel/strava-friend-finder">
-            <span class="rrssb-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 28 28">
-                <path d="M13.97 1.57c-7.03 0-12.733 5.703-12.733 12.74 0 5.622 3.636 10.393 8.717 12.084.637.13.87-.277.87-.615 0-.302-.013-1.103-.02-2.165-3.54.77-4.29-1.707-4.29-1.707-.578-1.473-1.413-1.863-1.413-1.863-1.154-.79.09-.775.09-.775 1.276.104 1.96 1.316 1.96 1.312 1.135 1.936 2.99 1.393 3.712 1.06.116-.823.445-1.384.81-1.704-2.83-.32-5.802-1.414-5.802-6.293 0-1.39.496-2.527 1.312-3.418-.132-.322-.57-1.617.123-3.37 0 0 1.07-.343 3.508 1.305 1.016-.282 2.105-.424 3.188-.43 1.082 0 2.167.156 3.198.44 2.43-1.65 3.498-1.307 3.498-1.307.695 1.754.258 3.043.13 3.37.815.903 1.314 2.038 1.314 3.43 0 4.893-2.978 5.97-5.814 6.286.458.388.876 1.16.876 2.358 0 1.703-.016 3.076-.016 3.482 0 .334.232.748.877.61 5.056-1.687 8.7-6.456 8.7-12.08-.055-7.058-5.75-12.757-12.792-12.75z"
-                />
-              </svg>
-            </span>
-            <span class="rrssb-text">github</span>
-          </a>
-        </li>
-        <li class="rrssb-facebook">
-          <a href="https://www.facebook.com/sharer/sharer.php?u=http://www.stravafriend.me" class="popup">
-            <span class="rrssb-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid" width="29" height="29" viewBox="0 0 29 29">
-                <path d="M26.4 0H2.6C1.714 0 0 1.715 0 2.6v23.8c0 .884 1.715 2.6 2.6 2.6h12.393V17.988h-3.996v-3.98h3.997v-3.062c0-3.746 2.835-5.97 6.177-5.97 1.6 0 2.444.173 2.845.226v3.792H21.18c-1.817 0-2.156.9-2.156 2.168v2.847h5.045l-.66 3.978h-4.386V29H26.4c.884 0 2.6-1.716 2.6-2.6V2.6c0-.885-1.716-2.6-2.6-2.6z"
-                class="cls-2" fill-rule="evenodd" />
-              </svg>
-            </span>
-            <span class="rrssb-text">facebook</span>
-          </a>
-        </li>
-        <li class="rrssb-twitter">
-          <a href="http://twitter.com/home?status=Find%20friends%20on%20strava%20http://www.stravafriend.me%20via%20@philipbeel"
-          class="popup">
-            <span class="rrssb-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 28 28">
-                <path d="M24.253 8.756C24.69 17.08 18.297 24.182 9.97 24.62c-3.122.162-6.22-.646-8.86-2.32 2.702.18 5.375-.648 7.507-2.32-2.072-.248-3.818-1.662-4.49-3.64.802.13 1.62.077 2.4-.154-2.482-.466-4.312-2.586-4.412-5.11.688.276 1.426.408 2.168.387-2.135-1.65-2.73-4.62-1.394-6.965C5.574 7.816 9.54 9.84 13.802 10.07c-.842-2.738.694-5.64 3.434-6.48 2.018-.624 4.212.043 5.546 1.682 1.186-.213 2.318-.662 3.33-1.317-.386 1.256-1.248 2.312-2.4 2.942 1.048-.106 2.07-.394 3.02-.85-.458 1.182-1.343 2.15-2.48 2.71z"
-                />
-              </svg>
-            </span>
-            <span class="rrssb-text">twitter</span>
-          </a>
-        </li>
-        <li class="rrssb-linkedin">
-          <a href="http://www.linkedin.com/shareArticle?mini=true&amp;url=http://www.stravafriend.me&amp;title=Find%20friends%20on%20strava" class="popup">
-            <span class="rrssb-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 28 28">
-                <path d="M25.424 15.887v8.447h-4.896v-7.882c0-1.98-.71-3.33-2.48-3.33-1.354 0-2.158.91-2.514 1.802-.13.315-.162.753-.162 1.194v8.216h-4.9s.067-13.35 0-14.73h4.9v2.087c-.01.017-.023.033-.033.05h.032v-.05c.65-1.002 1.812-2.435 4.414-2.435 3.222 0 5.638 2.106 5.638 6.632zM5.348 2.5c-1.676 0-2.772 1.093-2.772 2.54 0 1.42 1.066 2.538 2.717 2.546h.032c1.71 0 2.77-1.132 2.77-2.546C8.056 3.593 7.02 2.5 5.344 2.5h.005zm-2.48 21.834h4.896V9.604H2.867v14.73z"
-                />
-              </svg>
-            </span>
-            <span class="rrssb-text">linkedin</span>
-          </a>
-        </li>        
-      </ul>
-    </div>
+	</div>
+		<footer class="row ribbon">
+
+			<div class="row">
+				<div class="large-8 columns">
+					<h3>ABOUT CYCLE FRIEND FINDER</h3>
+					<p>Cycle Friend allows you to find active <a href="http://strava.com" title="powered by Strava">Strava</a> users nearby. Moving somewhere new can be exciting, but also, at times, tedious. Use Cycle Friend to follow new people and discover new and exciting cycling routes. You can contribute to this project on <a href="https://github.com/philipbeel/cycle-friend-finder">github</a>. This app uses Strava’s V3 API and <a href="https://nodejs.org/">Node</a>, with <a href="http://expressjs.com/">express</a> and <a href="http://socket.io/">socket.io</a> to make it lightning fast!</p>
+				</div>
+				<div class="large-4 columns">
+							<h3>I'M <a href="http://strava.com"><img src="assets/strava-social.png" alt="strava" /></a></h3>
+					    <div class="share-container">
+					      <ul class="rrssb-buttons">
+					        <li class="rrssb-twitter">
+					          <a href="http://twitter.com/home?status=Find%20friends%20on%20strava%20http://www.cyclefriend.me%20via%20@philipbeel"
+					          class="popup">
+					            <span class="rrssb-icon">
+					              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 28 28">
+					                <path d="M24.253 8.756C24.69 17.08 18.297 24.182 9.97 24.62c-3.122.162-6.22-.646-8.86-2.32 2.702.18 5.375-.648 7.507-2.32-2.072-.248-3.818-1.662-4.49-3.64.802.13 1.62.077 2.4-.154-2.482-.466-4.312-2.586-4.412-5.11.688.276 1.426.408 2.168.387-2.135-1.65-2.73-4.62-1.394-6.965C5.574 7.816 9.54 9.84 13.802 10.07c-.842-2.738.694-5.64 3.434-6.48 2.018-.624 4.212.043 5.546 1.682 1.186-.213 2.318-.662 3.33-1.317-.386 1.256-1.248 2.312-2.4 2.942 1.048-.106 2.07-.394 3.02-.85-.458 1.182-1.343 2.15-2.48 2.71z"
+					                />
+					              </svg>
+					            </span>
+					            <span class="rrssb-text">twitter</span>
+					          </a>
+					        </li>
+									<li class="rrssb-facebook">
+					          <a href="https://www.facebook.com/sharer/sharer.php?u=http://www.cyclefriend.me" class="popup">
+					            <span class="rrssb-icon">
+					              <svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid" width="29" height="29" viewBox="0 0 29 29">
+					                <path d="M26.4 0H2.6C1.714 0 0 1.715 0 2.6v23.8c0 .884 1.715 2.6 2.6 2.6h12.393V17.988h-3.996v-3.98h3.997v-3.062c0-3.746 2.835-5.97 6.177-5.97 1.6 0 2.444.173 2.845.226v3.792H21.18c-1.817 0-2.156.9-2.156 2.168v2.847h5.045l-.66 3.978h-4.386V29H26.4c.884 0 2.6-1.716 2.6-2.6V2.6c0-.885-1.716-2.6-2.6-2.6z"
+					                class="cls-2" fill-rule="evenodd" />
+					              </svg>
+					            </span>
+					            <span class="rrssb-text">facebook</span>
+					          </a>
+					        </li>
+					        <li class="rrssb-linkedin">
+					          <a href="http://www.linkedin.com/shareArticle?mini=true&amp;url=http://www.cyclefriend.me&amp;title=Find%20friends%20on%20strava" class="popup">
+					            <span class="rrssb-icon">
+					              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 28 28">
+					                <path d="M25.424 15.887v8.447h-4.896v-7.882c0-1.98-.71-3.33-2.48-3.33-1.354 0-2.158.91-2.514 1.802-.13.315-.162.753-.162 1.194v8.216h-4.9s.067-13.35 0-14.73h4.9v2.087c-.01.017-.023.033-.033.05h.032v-.05c.65-1.002 1.812-2.435 4.414-2.435 3.222 0 5.638 2.106 5.638 6.632zM5.348 2.5c-1.676 0-2.772 1.093-2.772 2.54 0 1.42 1.066 2.538 2.717 2.546h.032c1.71 0 2.77-1.132 2.77-2.546C8.056 3.593 7.02 2.5 5.344 2.5h.005zm-2.48 21.834h4.896V9.604H2.867v14.73z"
+					                />
+					              </svg>
+					            </span>
+					            <span class="rrssb-text">linkedin</span>
+					          </a>
+					        </li>
+					      </ul>
+					    </div>
+
+				</div>
+
+			</div>
 	</footer>
-	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>	
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
 	<script src="js/foundation.min.js"></script>
 	<script src="js/foundation.reveal.js"></script>
 	<script src="js/socket.io.js"></script>
@@ -169,7 +151,7 @@
 
 		ga('create', 'UA-62777828-1', 'auto');
 		ga('send', 'pageview');
-	</script>	
+	</script>
 </body>
 
 </html>

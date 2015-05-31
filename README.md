@@ -1,10 +1,13 @@
-### Strava Friend Finder
+### Cycle Friend Finder
+
+App  : http://www.cyclefriend.me<br/>
+Twitter : [@philipbeel](https://twitter.com/philipbeel)<br/>
 
 App  : http://www.stravafriend.me<br/>
 Twitter : @philipbeel<br/>
 
 #### Description
-*Strava friend finder* Helps you find athletes and discover routes where you live.
+*Cycle friend finder* Helps you find athletes and discover routes where you live.
 
 #### Usage
 Install all dependencies:
@@ -26,7 +29,7 @@ In `strava_config` add the following, including your credentials from you develo
 
 Run the node script.
 
-    $ node strava.js
+    $ node cycle.js
 
 This will start a node server at `http://localhost:8088`, visit the href to view the app running.
 

@@ -4,35 +4,75 @@ body {
 	text-rendering: optimizeLegibility;
 }
 
-.hero h1 {
+.topper {
+	background: #F3D915;
+  height: 12px;
+  margin: 0px;
+  width: 100%;
+  max-width: 100%;
+}
+
+.hero h1.logo {
+	font-family: 'Oswald', sans-serif;
 	font-size: 60px;
-	font-weight: bold;
+	border: 4px solid #FFF;
 	color: #FFF;
 	text-shadow: 1px 1px 1px rgba(150, 150, 150, 0.49);
 	text-align: center;
-	margin: 20px;
+	margin: 10px auto;
+	max-width: 350px;
+}
+
+.hero a:hover {
+	text-decoration: underline;
+}
+
+.hero a, .hero a:link, .hero a:visited, .hero a:active,
+.ribbon a, .ribbon a:link, .ribbon a:visited, .ribbon a:active {
+		color: #F3D915;
+		text-shadow: none;
+}
+
+.hero .button, .hero .button.postfix {
+		background: #F3D915;
+		color: #1A1C27;
+		font-family: 'Oswald', sans-serif;
+		min-height: 42px;
+}
+
+.hero .friend-search {
+	font-family: 'Oswald', sans-serif;
+	text-transform: uppercase;
+	font-weight: lighter;
+	padding: 20px;
+}
+
+.hero p.supporting {
+		text-align: center;
+		text-shadow: 1px 1px 1px rgba(150, 150, 150, 0.49);
+		color: #FFF;
+		font-size: 22px;
 }
 
 .results h2 {
 	font-size: 30px;
-	font-weight: bold;
+	text-transform: uppercase;
+	font-family: 'Oswald', sans-serif;
 	padding: 0 10px;
 }
 
-.reveal-modal h2 {
-	font-size: 30px;
-	font-weight: bold;
-}
-
-.reveal-modal p.lead {
-	font-weight: bold;
-}
-
 h4 {
-	text-transform: none;
+	text-transform: uppercase;
+	font-family: 'Oswald', sans-serif;
 	font-size: 24px;
-	font-weight: bold;
 }
+
+.athlete p {
+	text-transform: uppercase;
+	font-family: 'Oswald', sans-serif;
+	font-weight: lighter;
+}
+
 hr {
 	text-align: center;
 	margin: 0 auto;
@@ -129,26 +169,26 @@ footer p, footer a {
 	font-size: 14px;
 }
 
-.logo {
-	background: url("https://s3.amazonaws.com/stravafriendfinder/brand.png") no-repeat;
-	width: 387px;
-	height: 44px;
-	margin: 10px 0;
+.shutter {
+	background-image: url("https://s3-eu-west-1.amazonaws.com/cyclefriend/shutter.png");
+	background-repeat: repeat;
+	background-position: center;
+	max-height: 550px;
 }
 
 .hero {
 	padding-bottom: 50px;
-	background-image: url("https://s3.amazonaws.com/stravafriendfinder/hero.jpg");
+	background-image: url("https://s3-eu-west-1.amazonaws.com/cyclefriend/hero.jpg");
 	background-size: cover;
 	background-position: center;
-	height: 500px;
+	height: 550px;
 }
 
 ::selection {
-  background-color: #fc4c02;
+  background-color: #b1b1b1;
   color: #fff;
   text-shadow: none;
-}	
+}
 
 
 .button.postfix {
@@ -214,7 +254,7 @@ footer p, footer a {
 	-webkit-border-radius: 50%;
 	-moz-border-radius: 50%;
 	height: 124px;
-	width: 124px;	
+	width: 124px;
 }
 
 .results .athlete {
@@ -228,7 +268,7 @@ footer p, footer a {
 }
 
 .results .athlete .premium {
-	background: url("https://s3.amazonaws.com/stravafriendfinder/premium-badge.png");
+	background: url("https://s3-eu-west-1.amazonaws.com/cyclefriend/premium-badge.png");
 	width: 35px;
 	height: 40px;
 	position: absolute;
@@ -314,7 +354,7 @@ footer p, footer a {
 	display: inline-block;
 	position: absolute;
 	top: 0;
-	background-color: #fc4c02;
+	background-color: #1A1C27;
 	border-radius: 100%;
 
 	-webkit-animation: bounce 2.0s infinite ease-in-out;
@@ -353,8 +393,43 @@ footer p, footer a {
 	font-size: 12px;
 }
 
+/* footer */
+.ribbon {
+	color: #FFF;
+	width: 100%;
+	max-width: 100%;
+	background: #18171d;
+	padding: 25px 0px;
+}
+
+.ribbon .row {
+	max-width: 62.5rem;
+	margin: auto;
+}
+.ribbon h3 {
+	font-family: 'Oswald', sans-serif;
+	color: #FFF;
+}
+
+.ribbon img {
+	margin-top: -17px;
+}
+.ribbon ul, .ribbon li {
+	padding: 0px;
+	margin: 0px;
+	list-style: none;
+}
+
+.ribbon p {
+	color: #8b8b8b;
+}
+
+.share-container {
+	padding-top:12px;
+}
+
 /* max-width 640px, mobile-only styles, use when QAing mobile issues */
-@media only screen and (max-width: 40em) { 
+@media only screen and (max-width: 40em) {
 	.finder {
 		margin: 0px 0;
 	}
@@ -366,17 +441,12 @@ footer p, footer a {
 	#error {
 		margin: 20px 0 0 0;
 	}
-} 
+}
 
 /* Social buttons */
 .share-container {
-  padding: 50px 10px;
-  float: left;
-  width: 100%;
-  border-top: 1px solid #ddd;
-  position: relative;
+	margin: auto;
 }
-
 .rrssb-buttons li a .rrssb-text {
 	padding-left: 5px;
 }

@@ -3,9 +3,6 @@
 App  : http://www.cyclefriend.me<br/>
 Twitter : [@philipbeel](https://twitter.com/philipbeel)<br/>
 
-App  : http://www.stravafriend.me<br/>
-Twitter : @philipbeel<br/>
-
 #### Description
 *Cycle friend finder* Helps you find athletes and discover routes where you live.
 

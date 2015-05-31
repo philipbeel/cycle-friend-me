@@ -24,7 +24,7 @@ swig.setDefaults({ cache: false });
 
 app.use('/', express.static(__dirname + '/public'));
 
-server.listen(8088, function () {
+server.listen(8080, function () {
 	var host = server.address().address;
 	var port = server.address().port;
 
@@ -94,7 +94,7 @@ function storeAthletesFriends (callback) {
 function athleteWasFound (response) {
 	var result = response && response.message || null;
 
-	return (result === 'Record Not Found') ? false : true ; 
+	return (result === 'Record Not Found') ? false : true ;
 }
 
 /**
@@ -307,7 +307,7 @@ function cleanLocation(city, state) {
 	var cleanCity = city && city.replace('+', ' ') || '';
 	var cleanState = state && state.replace('+', ' ') || '';
 
-	return cleanCity + ' ' + cleanState;	
+	return cleanCity + ' ' + cleanState;
 }
 
 /**
@@ -347,7 +347,7 @@ function renderFriend (friend) {
  * - Results must have been retured
  * - No adverts have already been displayed
  *
- * @param {Integer} count number of athletes added to DOM 
+ * @param {Integer} count number of athletes added to DOM
  *
  */
 function renderAdvert (count) {

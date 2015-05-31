@@ -170,7 +170,7 @@ footer p, footer a {
 }
 
 .shutter {
-	background-image: url("../assets/shutter.png");
+	background-image: url("https://s3-eu-west-1.amazonaws.com/cyclefriend/shutter.png");
 	background-repeat: repeat;
 	background-position: center;
 	max-height: 550px;
@@ -178,7 +178,7 @@ footer p, footer a {
 
 .hero {
 	padding-bottom: 50px;
-	background-image: url("https://s3.amazonaws.com/stravafriendfinder/hero.jpg");
+	background-image: url("https://s3-eu-west-1.amazonaws.com/cyclefriend/hero.jpg");
 	background-size: cover;
 	background-position: center;
 	height: 550px;
@@ -268,7 +268,7 @@ footer p, footer a {
 }
 
 .results .athlete .premium {
-	background: url("https://s3.amazonaws.com/stravafriendfinder/premium-badge.png");
+	background: url("https://s3-eu-west-1.amazonaws.com/cyclefriend/premium-badge.png");
 	width: 35px;
 	height: 40px;
 	position: absolute;

@@ -13,7 +13,10 @@
     "forever": "^0.14.1"
   },
   "main": "strava.js",
-  "devDependencies": {},
+  "devDependencies": {
+    "passport": "^0.3.2",
+    "passport-strava": "^0.2.0"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

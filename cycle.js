@@ -6,6 +6,8 @@ var http = require('http');
 var swig  = require('swig');
 var server = require('http').createServer(app);
 var io = require('socket.io')(server);
+// var passport = require('passport');
+// var StravaStrategy = require('passport-strava').Strategy;
 
 var athleteId = null;
 var athletesCloseBy = [];
@@ -21,6 +23,45 @@ app.set('views', __dirname + '/templates');
 app.set('view cache', false);
 
 swig.setDefaults({ cache: false });
+
+// authorise the app
+app.get('/authorised', function (req, res) {
+	if (req.query['error']) {
+		res.send('Failed to authenticate, please try again');
+	}
+
+  	var authorsationCode = req.query['code'];
+	var STRAVA_CLIENT_SECRET = '5c60b5c960f0fea81d7d53d9918205e7134f0a32';
+	var STRAVA_CLIENT_ID = '5615';
+
+	// passport.use(new StravaStrategy({
+	// 	clientID: STRAVA_CLIENT_ID,
+	// 	clientSecret: STRAVA_CLIENT_SECRET,
+	// 	callbackURL: "http://127.0.0.1:8088/authorised"
+	// },
+	// function(accessToken, refreshToken, profile, cb) {
+	// 	User.findOrCreate({ stravaId: profile.id }, function (err, user) {
+	// 		console.log("accessToken::", accessToken);
+	// 		console.log("refreshToken::", refreshToken);
+	// 		console.log("profile::", profile);
+
+	// 		res.send(profile);
+	// 	});
+	// }
+	// ));
+
+	request.post('https://www.strava.com/oauth/token',
+		{
+			'code': authorsationCode,
+			'client_id': clientId,
+			'client_secret': clientSecret
+		}, function (error, response, body) {
+			console.log('client_id', clientId);
+			console.log('client_secret', clientSecret);
+			console.log('code', authorsationCode);
+		res.send(response);
+	});
+});
 
 app.use('/', express.static(__dirname + '/public'));
 

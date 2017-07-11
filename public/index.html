@@ -45,24 +45,13 @@
 			<div class="row">
 				<div class="finder large-12 columns">
 					<h1 class="logo">CYCLE FRIEND</h1>
-					<p class="supporting">Find friends. Discover routes.<br />
-						Enter your Strava ID, as it appears in the URL bar at this address:<br />
-					<strong><a data-tooltip aria-haspopup="true" class="has-tip" data-disable-hover="false" tabindex="2" href="http://strava.com/me">http://strava.com/me</a></strong></p>
-
-
-					<form name="routeFinder" id="routeFinder" method="get" action="#">
-						<div class="row collapse">
-							<div class="large-offset-1 large-8 columns">
-								<input value="" class="friend-search" id="athleteId" type="text" placeholder="Your Strava athlete ID">
-							</div>
-							<div class="large-2 columns end">
-								<input type="submit" id="find" class="button postfix" value="FIND FRIENDS"/>
-							</div>
-						</div>
-					</form>
+					<p class="supporting">Find friends. Discover routes.<br /><br />
+						
+						<a href="https://www.strava.com/oauth/authorize?client_id=5615&scope=view_private&response_type=code&redirect_uri=http://127.0.0.1:8088/authorised&approval_prompt=force">
+							<img src="assets/btn_strava_connectwith_orange.svg" alt="connect to strava" />
+						</a>					
 				</div>
 			</div>
-
 		</div>
 	</div>
 
@@ -147,9 +136,6 @@
 	</div>
 		
 
-
-
-	
 	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
 	<script src="js/foundation.min.js"></script>
 	<script src="js/foundation.reveal.js"></script>

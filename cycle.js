@@ -6,6 +6,7 @@ var http = require('http');
 var swig  = require('swig');
 var server = require('http').createServer(app);
 var io = require('socket.io')(server);
+var authorize = require('strava-v3-cli-authenticator');
 // var passport = require('passport');
 // var StravaStrategy = require('passport-strava').Strategy;
 
@@ -24,15 +25,34 @@ app.set('view cache', false);
 
 swig.setDefaults({ cache: false });
 
+var STRAVA_CLIENT_SECRET = '5c60b5c960f0fea81d7d53d9918205e7134f0a32';
+var STRAVA_CLIENT_ID = '5615';
+
+const options = {
+	clientId: STRAVA_CLIENT_ID,
+	clientSecret: STRAVA_CLIENT_SECRET,
+	scope: 'write',
+	httpPort: 8808
+};
+const callback = (error, accessToken) => {
+	if (error) {
+	console.error('Failed: ', error);
+	} else {
+	console.log('Access token: ', accessToken);
+	}
+};
+
 // authorise the app
 app.get('/authorised', function (req, res) {
-	if (req.query['error']) {
-		res.send('Failed to authenticate, please try again');
-	}
+	// if (req.query['error']) {
+	// 	res.send('Failed to authenticate, please try again');
+	// }
 
-  	var authorsationCode = req.query['code'];
-	var STRAVA_CLIENT_SECRET = '5c60b5c960f0fea81d7d53d9918205e7134f0a32';
-	var STRAVA_CLIENT_ID = '5615';
+  	// var authorsationCode = req.query['code'];
+	authorize(options, function () {
+		console.log('options::', options);
+		res.send('hello world!');
+	});
 
 	// passport.use(new StravaStrategy({
 	// 	clientID: STRAVA_CLIENT_ID,
@@ -50,17 +70,17 @@ app.get('/authorised', function (req, res) {
 	// }
 	// ));
 
-	request.post('https://www.strava.com/oauth/token',
-		{
-			'code': authorsationCode,
-			'client_id': clientId,
-			'client_secret': clientSecret
-		}, function (error, response, body) {
-			console.log('client_id', clientId);
-			console.log('client_secret', clientSecret);
-			console.log('code', authorsationCode);
-		res.send(response);
-	});
+	// request.post('https://www.strava.com/oauth/token',
+	// 	{
+	// 		'code': authorsationCode,
+	// 		'client_id': clientId,
+	// 		'client_secret': clientSecret
+	// 	}, function (error, response, body) {
+	// 		console.log('client_id', clientId);
+	// 		console.log('client_secret', clientSecret);
+	// 		console.log('code', authorsationCode);
+	// 	res.send(response);
+	// });
 });
 
 app.use('/', express.static(__dirname + '/public'));

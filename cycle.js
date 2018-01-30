@@ -25,8 +25,9 @@ app.set('view cache', false);
 swig.setDefaults({ cache: false });
 
 // @TODO: remove sensetive data in request
-const STRAVA_CLIENT_SECRET = '5c60b5c960f0fea81d7d53d9918205e7134f0a32';
-const STRAVA_CLIENT_ID = '5615';
+// @TODO: ADD THIS BACK IN
+const STRAVA_CLIENT_SECRET = '';
+const STRAVA_CLIENT_ID = '';
 
 app.use('/', express.static(__dirname + '/public'));
 

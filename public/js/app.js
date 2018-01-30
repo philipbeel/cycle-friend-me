@@ -26,11 +26,7 @@ jQuery(function(){
 
 		init: function () {
 			this.setupFormHandler();
-			this.setDefaultFocus();
-		},
-
-		setDefaultFocus: function  () {
-			$( "#athleteId" ).focus();
+			this.checkAuthorisation()
 		},
 
 		setupFormHandler: function () {
@@ -48,6 +44,14 @@ jQuery(function(){
 					this.scrollToResults();
 				}
 			}.bind(this));
+		},
+		
+		checkAuthorisation: function () {
+			var urlParams = new URLSearchParams(window.location.search);
+			var accessCode = urlParams.get('code');
+			if (accessCode) {
+				socket.emit('accessCode', accessCode);
+			}
 		},
 
 		prepareSearch: function () {

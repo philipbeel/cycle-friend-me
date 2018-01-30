@@ -7,8 +7,6 @@ var swig  = require('swig');
 var server = require('http').createServer(app);
 var io = require('socket.io')(server);
 var authorize = require('strava-v3-cli-authenticator');
-// var passport = require('passport');
-// var StravaStrategy = require('passport-strava').Strategy;
 
 var athleteId = null;
 var athletesCloseBy = [];
@@ -17,6 +15,7 @@ var totalMatchedAthletes = 0;
 var friends = [];
 var city = null;
 var nodeSocket;
+var accessToken = null;
 
 app.engine('html', swig.renderFile);
 app.set('view engine', 'html');
@@ -25,63 +24,9 @@ app.set('view cache', false);
 
 swig.setDefaults({ cache: false });
 
-var STRAVA_CLIENT_SECRET = '5c60b5c960f0fea81d7d53d9918205e7134f0a32';
-var STRAVA_CLIENT_ID = '5615';
-
-const options = {
-	clientId: STRAVA_CLIENT_ID,
-	clientSecret: STRAVA_CLIENT_SECRET,
-	scope: 'write',
-	httpPort: 8808
-};
-const callback = (error, accessToken) => {
-	if (error) {
-	console.error('Failed: ', error);
-	} else {
-	console.log('Access token: ', accessToken);
-	}
-};
-
-// authorise the app
-app.get('/authorised', function (req, res) {
-	// if (req.query['error']) {
-	// 	res.send('Failed to authenticate, please try again');
-	// }
-
-  	// var authorsationCode = req.query['code'];
-	authorize(options, function () {
-		console.log('options::', options);
-		res.send('hello world!');
-	});
-
-	// passport.use(new StravaStrategy({
-	// 	clientID: STRAVA_CLIENT_ID,
-	// 	clientSecret: STRAVA_CLIENT_SECRET,
-	// 	callbackURL: "http://127.0.0.1:8088/authorised"
-	// },
-	// function(accessToken, refreshToken, profile, cb) {
-	// 	User.findOrCreate({ stravaId: profile.id }, function (err, user) {
-	// 		console.log("accessToken::", accessToken);
-	// 		console.log("refreshToken::", refreshToken);
-	// 		console.log("profile::", profile);
-
-	// 		res.send(profile);
-	// 	});
-	// }
-	// ));
-
-	// request.post('https://www.strava.com/oauth/token',
-	// 	{
-	// 		'code': authorsationCode,
-	// 		'client_id': clientId,
-	// 		'client_secret': clientSecret
-	// 	}, function (error, response, body) {
-	// 		console.log('client_id', clientId);
-	// 		console.log('client_secret', clientSecret);
-	// 		console.log('code', authorsationCode);
-	// 	res.send(response);
-	// });
-});
+// @TODO: remove sensetive data in request
+const STRAVA_CLIENT_SECRET = '5c60b5c960f0fea81d7d53d9918205e7134f0a32';
+const STRAVA_CLIENT_ID = '5615';
 
 app.use('/', express.static(__dirname + '/public'));
 
@@ -94,13 +39,30 @@ server.listen(8088, function () {
 
 io.on('connection', function (socket) {
 
-	socket.on('athlete', function (data) {
-		nodeSocket = socket;
-		athleteId = data;
+	socket.on('accessCode', function (accessCode) {
+		var response;
+		var formData = {			
+			code: accessCode,
+			client_id: STRAVA_CLIENT_ID,
+			client_secret: STRAVA_CLIENT_SECRET
+		};
+		request.post({
+			url: 'https://www.strava.com/oauth/token', 
+			formData: formData
+		}, function optionalCallback(err, httpResponse, body) {
+			if (err) {
+				renderErrorResponse(err);
+			}
+			prepareForSearch();	
 
-		prepareForSearch();
-
-		storeAthletesFriends(getAthleteLocationFromId);
+			response = JSON.parse(body);
+			nodeSocket = socket;
+			athleteId = response.athlete.id;
+			accessToken = response.access_token;
+			console.log('accessToken::',accessToken);
+			// @todo get access token to be acceped in making requests for strava v3 API
+			storeAthletesFriends(getAthleteLocationFromId);
+		});
 	});
 });
 
@@ -114,6 +76,7 @@ function prepareForSearch () {
 	totalMatchedAthletes = 0;
 	friends = [];
 	city = null;
+	accessToken = null;
 }
 
 /**
@@ -125,17 +88,17 @@ function prepareForSearch () {
 function storeAthletesFriends (callback) {
 
 	strava.athletes.listFriends({
+		"access_token": accessToken,
 		"id": athleteId
 		},function(err, payload) {
 		if(!err && apiRequestWithinRateLimit(payload)) {
-
+			console.log('payload::', payload);
 			if(athleteWasFound(payload)) {
 				payload.forEach(function (athlete, index) {
 					athleteFriends.push(athlete.id);
 				});
 
 				callback();
-
 			} else {
 		   		renderErrorResponse('Athlete was not found on Strava');
 			}
@@ -171,6 +134,7 @@ function getAthleteLocationFromId() {
 	console.log("::: getAthleteLocationFromId");
 
 	strava.athletes.get({
+		"access_token": accessToken,
 		"id": athleteId
 		},function(err, payload) {
 		if(!err && apiRequestWithinRateLimit(payload)) {
@@ -257,6 +221,7 @@ function getSegmentsForGeoBounds (coordinates) {
 	console.log("::: getSegmentsForGeoBounds", coordinates);
 
 	strava.segments.explore({
+		"access_token": accessToken,
 		'bounds': coordinates.southwest.lat+','+coordinates.southwest.lng+','+coordinates.northeast.lat+','+coordinates.northeast.lng
 	},function(err,payload) {
 	    if(!err && apiRequestWithinRateLimit(payload)) {
@@ -285,6 +250,7 @@ function lookupAthletesForSpecifiedSegment (segmentId) {
 	console.log("::: lookupAthletesForSpecifiedSegment", segmentId);
 
 	strava.segments.listLeaderboard({
+		"access_token": accessToken,
 		"id": segmentId,
 		"gender": "M",
 		"following": false,
@@ -326,6 +292,7 @@ function filterAthletesBasedOnAddress (athleteIdentifier) {
 		athletesCloseBy.push(athleteIdentifier);
 
 		strava.athletes.get({
+			"access_token": accessToken,
 			"id": athleteIdentifier
 		},function(err,payload) {
 		    if(!err && apiRequestWithinRateLimit(payload)) {

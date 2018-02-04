@@ -2,11 +2,10 @@ var express = require('express');
 var app = express();
 var strava = require('strava-v3');
 var request = require('request');
-var http = require('http');
 var swig  = require('swig');
 var server = require('http').createServer(app);
 var io = require('socket.io')(server);
-var authorize = require('strava-v3-cli-authenticator');
+var waterfall = require('async-waterfall');
 
 var athleteId = null;
 var athletesCloseBy = [];
@@ -14,7 +13,6 @@ var athleteFriends=[];
 var totalMatchedAthletes = 0;
 var friends = [];
 var city = null;
-var nodeSocket;
 var accessToken = null;
 
 app.engine('html', swig.renderFile);
@@ -26,8 +24,8 @@ swig.setDefaults({ cache: false });
 
 // @TODO: remove sensetive data in request
 // @TODO: ADD THIS BACK IN
-const STRAVA_CLIENT_SECRET = '';
-const STRAVA_CLIENT_ID = '';
+const STRAVA_CLIENT_SECRET = '5c60b5c960f0fea81d7d53d9918205e7134f0a32';
+const STRAVA_CLIENT_ID = '5615';
 
 app.use('/', express.static(__dirname + '/public'));
 
@@ -47,31 +45,110 @@ io.on('connection', function (socket) {
 			client_id: STRAVA_CLIENT_ID,
 			client_secret: STRAVA_CLIENT_SECRET
 		};
-		request.post({
-			url: 'https://www.strava.com/oauth/token', 
+
+		// example::
+		waterfall([
+			function prepareForSearch(done) {
+				console.log('called::prepareForSearch::');
+				athletesCloseBy = [];
+				athleteFriends = [];
+				totalMatchedAthletes = 0;
+				friends = [];
+				city = null;
+				accessToken = null;
+				done(null, 'Value from step 1'); // <- set value to passed to step 2
+			},
+			function secondStep(step1Result, done) {
+				console.log('called::authenticateAthlete::')
+				return request.post({
+					url: 'https://www.strava.com/oauth/token',
+					formData: formData
+				}, function optionalCallback(err, httpResponse, body) {
+					if (err) {
+						renderErrorResponse(err);
+					}
+					response = JSON.parse(body);
+					athleteId = response.athlete.id;
+					accessToken = response.access_token;
+					console.log('++', response);
+					done(null, athleteId, accessToken); // <- set value to passed to step 3
+				});
+			},
+			function thirdStep(athleteId, accessToken, done) {
+				console.log('called::getAthleteFriends::', athleteId, accessToken);
+				return function () {
+					strava.athlete.get({
+						'id': athleteId,
+						'access_token': accessToken
+					}, function (err, payload) {
+						if (!err) {
+							console.log(payload);
+						} else {
+							console.log(err);
+						}
+					});
+				}
+
+				// console.log(step2Result);
+
+				done(null); // <- no value set for the next step.
+			}
+		],
+			function (err) {
+				if (err) {
+					throw new Error(err);
+				} else {
+					console.log('No error happened in any steps, operation done!');
+				}
+			});
+			
+		// waterfall([
+		// 	prepareForSearch(),
+		// 	authenticateAthlete(formData),
+		// 	getAthleteFriends()
+		// ], function (err, result) {
+		// 	console.log('async waterfall complete::', err, result);
+		// });
+	});
+});
+
+function authenticateAthlete(formData) {
+	console.log('called::authenticateAthlete::')
+	return request.post({
+			url: 'https://www.strava.com/oauth/token',
 			formData: formData
 		}, function optionalCallback(err, httpResponse, body) {
 			if (err) {
 				renderErrorResponse(err);
 			}
-			prepareForSearch();	
-
 			response = JSON.parse(body);
-			nodeSocket = socket;
 			athleteId = response.athlete.id;
 			accessToken = response.access_token;
-			console.log('accessToken::',accessToken);
-			// @todo get access token to be acceped in making requests for strava v3 API
-			storeAthletesFriends(getAthleteLocationFromId);
-		});
+			console.log('++', response);
 	});
-});
+}
 
+function getAthleteFriends() {
+	console.log('called::getAthleteFriends::', athleteId, accessToken);
+	return function () {
+		strava.athlete.get({
+			'id': athleteId,
+			'access_token': accessToken
+		}, function (err, payload) {
+			if (!err) {
+				console.log(payload);
+			} else {
+				console.log(err);
+			}
+		});
+	}
+}
 /**
  * @description Squares away any previous search info that
  * could skew new result sets
  */
 function prepareForSearch () {
+	console.log('called::prepareForSearch::');
 	athletesCloseBy = [];
 	athleteFriends = [];
 	totalMatchedAthletes = 0;
@@ -87,13 +164,14 @@ function prepareForSearch () {
  * @param  {integer} ID
  */
 function storeAthletesFriends (callback) {
-
+	console.log('storeAthletesFriends::access_token', accessToken)
+	console.log('storeAthletesFriends::id', athleteId);
 	strava.athletes.listFriends({
-		"access_token": accessToken,
-		"id": athleteId
+		'access_token': accessToken,
+		'id': athleteId
 		},function(err, payload) {
 		if(!err && apiRequestWithinRateLimit(payload)) {
-			console.log('payload::', payload);
+			console.log('payload::err', err);
 			if(athleteWasFound(payload)) {
 				payload.forEach(function (athlete, index) {
 					athleteFriends.push(athlete.id);

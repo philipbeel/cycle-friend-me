@@ -22,8 +22,6 @@ app.set('view cache', false);
 
 swig.setDefaults({ cache: false });
 
-// @TODO: remove sensetive data in request
-// @TODO: ADD THIS BACK IN
 const STRAVA_CLIENT_SECRET = '5c60b5c960f0fea81d7d53d9918205e7134f0a32';
 const STRAVA_CLIENT_ID = '5615';
 
@@ -37,19 +35,16 @@ server.listen(8088, function () {
 });
 
 io.on('connection', function (socket) {
-
 	socket.on('accessCode', function (accessCode) {
-		var response;
 		var formData = {			
 			code: accessCode,
 			client_id: STRAVA_CLIENT_ID,
 			client_secret: STRAVA_CLIENT_SECRET
 		};
 
-		// example::
 		waterfall([
 			function prepareForSearch(done) {
-				console.log('called::prepareForSearch::');
+				console.log('called::prepareForSearch:: START');
 				athletesCloseBy = [];
 				athleteFriends = [];
 				totalMatchedAthletes = 0;
@@ -58,40 +53,75 @@ io.on('connection', function (socket) {
 				accessToken = null;
 				done(null, 'Value from step 1'); // <- set value to passed to step 2
 			},
-			function secondStep(step1Result, done) {
-				console.log('called::authenticateAthlete::')
+			function authenticateAthlete(step1Result, done) {
+				console.log('called::authenticateAthlete:: START');
 				return request.post({
 					url: 'https://www.strava.com/oauth/token',
 					formData: formData
-				}, function optionalCallback(err, httpResponse, body) {
-					if (err) {
-						renderErrorResponse(err);
-					}
-					response = JSON.parse(body);
-					athleteId = response.athlete.id;
-					accessToken = response.access_token;
-					console.log('++', response);
-					done(null, athleteId, accessToken); // <- set value to passed to step 3
+				}, function optionalCallback(err, httpResponse, response) {
+					var payload = JSON.parse(response);
+
+					if (!err && apiRequestWithinRateLimit(payload)) {
+						// create info object to pass along
+						var athleteBio = {
+							id: payload.athlete.id,
+							accessToken: payload.access_token,
+							location: {
+								city: payload.athlete.city.replace(" ", "+") || "",
+								state: payload.athlete.state.replace(" ", "+") || "",
+								country: payload.athlete.country.replace(" ", "+") || ""
+							}
+						}
+					} 
+					done(null, athleteBio);
 				});
 			},
-			function thirdStep(athleteId, accessToken, done) {
-				console.log('called::getAthleteFriends::', athleteId, accessToken);
-				return function () {
-					strava.athlete.get({
-						'id': athleteId,
-						'access_token': accessToken
-					}, function (err, payload) {
-						if (!err) {
-							console.log(payload);
-						} else {
-							console.log(err);
-						}
-					});
+			function getCoordinatesFromGeoLocation(athleteBio, done) {
+				console.log("::: getCoordinatesFromGeoLocation START");
+
+				if (!athleteBio.location.city) {
+					renderErrorResponse("you have not told strava where you live. Go to Strava > Settings > Profile and enter your address, then try again.");
+				} else {
+					request.get('http://maps.google.com/maps/api/geocode/json?address=' + athleteBio.location.city.toLowerCase() + '+' + athleteBio.location.state.toLowerCase() + '+' + athleteBio.location.country.toLowerCase(),
+						function (error, response, body) {
+							if (error && response.statusCode !== 200) {
+								renderErrorResponse("No location matched. Go to Strava > Settings > Profile and check your address is correct.");
+							} else {
+								var resp = JSON.parse(body);
+								var result = resp && resp.results && resp.results[0] && resp.results[0].geometry && resp.results[0].geometry.viewport || null;
+
+								if (result) {
+									athleteBio.coordinates = result;
+									done(null, athleteBio);
+								}
+							}
+						});
 				}
+			},
+			function getSegmentsForGeoBounds(athleteBio, done) {
+				console.log("::: getSegmentsForGeoBounds START");
 
-				// console.log(step2Result);
+				strava.segments.explore({
+					"access_token": athleteBio.accessToken,
+					'bounds': athleteBio.coordinates.southwest.lat + ',' + athleteBio.coordinates.southwest.lng + ',' + athleteBio.coordinates.northeast.lat + ',' + athleteBio.coordinates.northeast.lng
+				}, function (err, payload) {
+					if (!err && apiRequestWithinRateLimit(payload)) {
+						if (payload.segments.length > 0) {
+							payload.segments.forEach(function (item, index) {
+								// @todo: needs testing
+								if (index < 1) {
+									lookupAthletesForSpecifiedSegment(item.id, athleteBio);
+									done(null, athleteBio);
+								}
+							});
 
-				done(null); // <- no value set for the next step.
+						} else {
+							renderErrorResponse("No Strava segments were found near your location, that sucks..");
+						}
+					} else {
+						renderErrorResponse(err);
+					}
+				});
 			}
 		],
 			function (err) {
@@ -101,61 +131,53 @@ io.on('connection', function (socket) {
 					console.log('No error happened in any steps, operation done!');
 				}
 			});
-			
-		// waterfall([
-		// 	prepareForSearch(),
-		// 	authenticateAthlete(formData),
-		// 	getAthleteFriends()
-		// ], function (err, result) {
-		// 	console.log('async waterfall complete::', err, result);
-		// });
 	});
 });
 
-function authenticateAthlete(formData) {
-	console.log('called::authenticateAthlete::')
-	return request.post({
-			url: 'https://www.strava.com/oauth/token',
-			formData: formData
-		}, function optionalCallback(err, httpResponse, body) {
-			if (err) {
-				renderErrorResponse(err);
-			}
-			response = JSON.parse(body);
-			athleteId = response.athlete.id;
-			accessToken = response.access_token;
-			console.log('++', response);
-	});
-}
+// function authenticateAthlete(formData) {
+// 	console.log('called::authenticateAthlete::')
+// 	return request.post({
+// 			url: 'https://www.strava.com/oauth/token',
+// 			formData: formData
+// 		}, function optionalCallback(err, httpResponse, body) {
+// 			if (err) {
+// 				renderErrorResponse(err);
+// 			}
+// 			response = JSON.parse(body);
+// 			athleteId = response.athlete.id;
+// 			accessToken = response.access_token;
+// 			console.log('++', response);
+// 	});
+// }
 
-function getAthleteFriends() {
-	console.log('called::getAthleteFriends::', athleteId, accessToken);
-	return function () {
-		strava.athlete.get({
-			'id': athleteId,
-			'access_token': accessToken
-		}, function (err, payload) {
-			if (!err) {
-				console.log(payload);
-			} else {
-				console.log(err);
-			}
-		});
-	}
-}
+// function getAthleteFriends() {
+// 	console.log('called::getAthleteFriends::', athleteId, accessToken);
+// 	return function () {
+// 		strava.athlete.get({
+// 			'id': athleteId,
+// 			'access_token': accessToken
+// 		}, function (err, payload) {
+// 			if (!err) {
+// 				console.log(payload);
+// 			} else {
+// 				console.log(err);
+// 			}
+// 		});
+// 	}
+// }
 /**
  * @description Squares away any previous search info that
  * could skew new result sets
  */
-function prepareForSearch () {
-	console.log('called::prepareForSearch::');
-	athletesCloseBy = [];
-	athleteFriends = [];
-	totalMatchedAthletes = 0;
-	friends = [];
-	city = null;
-	accessToken = null;
-}
+// function prepareForSearch () {
+// 	console.log('called::prepareForSearch::');
+// 	athletesCloseBy = [];
+// 	athleteFriends = [];
+// 	totalMatchedAthletes = 0;
+// 	friends = [];
+// 	city = null;
+// 	accessToken = null;
+// }
 
 /**
  * @description collect all the friends of an athlete
@@ -163,31 +185,31 @@ function prepareForSearch () {
  *
  * @param  {integer} ID
  */
-function storeAthletesFriends (callback) {
-	console.log('storeAthletesFriends::access_token', accessToken)
-	console.log('storeAthletesFriends::id', athleteId);
-	strava.athletes.listFriends({
-		'access_token': accessToken,
-		'id': athleteId
-		},function(err, payload) {
-		if(!err && apiRequestWithinRateLimit(payload)) {
-			console.log('payload::err', err);
-			if(athleteWasFound(payload)) {
-				payload.forEach(function (athlete, index) {
-					athleteFriends.push(athlete.id);
-				});
+// function storeAthletesFriends (callback) {
+// 	console.log('storeAthletesFriends::access_token', accessToken)
+// 	console.log('storeAthletesFriends::id', athleteId);
+// 	strava.athletes.listFriends({
+// 		'access_token': accessToken,
+// 		'id': athleteId
+// 		},function(err, payload) {
+// 		if(!err && apiRequestWithinRateLimit(payload)) {
+// 			console.log('payload::err', err);
+// 			if(athleteWasFound(payload)) {
+// 				payload.forEach(function (athlete, index) {
+// 					athleteFriends.push(athlete.id);
+// 				});
 
-				callback();
-			} else {
-		   		renderErrorResponse('Athlete was not found on Strava');
-			}
-			console.log("::: storeAthletesFriends callback", payload);
+// 				callback();
+// 			} else {
+// 		   		renderErrorResponse('Athlete was not found on Strava');
+// 			}
+// 			console.log("::: storeAthletesFriends callback", payload);
 
-		} else {
-		   renderErrorResponse(err);
-		}
-	});
-}
+// 		} else {
+// 		   renderErrorResponse(err);
+// 		}
+// 	});
+// }
 
 /**
  * @description For an athlete ID check against Strava that they exist
@@ -206,28 +228,28 @@ function athleteWasFound (response) {
  *
  * @param  {integer} ID
  */
-function getAthleteLocationFromId() {
+// function getAthleteLocationFromId() {
 
-	var athleteLocation = {};
+// 	var athleteLocation = {};
 
-	console.log("::: getAthleteLocationFromId");
+// 	console.log("::: getAthleteLocationFromId");
 
-	strava.athletes.get({
-		"access_token": accessToken,
-		"id": athleteId
-		},function(err, payload) {
-		if(!err && apiRequestWithinRateLimit(payload)) {
+// 	strava.athletes.get({
+// 		"access_token": accessToken,
+// 		"id": athleteId
+// 		},function(err, payload) {
+// 		if(!err && apiRequestWithinRateLimit(payload)) {
 
-			athleteLocation.city = payload.city;
-			athleteLocation.state = payload.state;
-			athleteLocation.country = payload.country;
+// 			athleteLocation.city = payload.city;
+// 			athleteLocation.state = payload.state;
+// 			athleteLocation.country = payload.country;
 
-			getCoordinatesFromGeoLocation(athleteLocation);
-		} else {
-		   renderErrorResponse(err);
-		}
-	});
-}
+// 			getCoordinatesFromGeoLocation(athleteLocation);
+// 		} else {
+// 		   renderErrorResponse(err);
+// 		}
+// 	});
+// }
 
 /**
  * @description helper method to check if a request is going to exceed
@@ -256,38 +278,38 @@ function apiRequestWithinRateLimit (payload) {
  * @param  {string} Country
  *
  * @returns {object} the lat and long of SE, NW
- */
-function getCoordinatesFromGeoLocation (location) {
+*/
+// function getCoordinatesFromGeoLocation (location) {
 
-	console.log("::: getCoordinatesFromGeoLocation", location);
+// 	console.log("::: getCoordinatesFromGeoLocation", location);
 
-	var geoState = location && location.state && location.state.replace(" ", "+") || "";
-	var geoCountry = location && location.country && location.country.replace(" ", "+") || "";
-	var coordinates = {};
-	var result;
+// 	var geoState = location && location.state && location.state.replace(" ", "+") || "";
+// 	var geoCountry = location && location.country && location.country.replace(" ", "+") || "";
+// 	var coordinates = {};
+// 	var result;
 
-	city = location && location.city && location.city.replace(" ", "+") || "";
+// 	city = location && location.city && location.city.replace(" ", "+") || "";
 
-	if(!city) {
-		renderErrorResponse("you have not told strava where you live. Go to Strava > Settings > Profile and enter your address, then try again.");
-	} else {
-		request('http://maps.google.com/maps/api/geocode/json?address='+city.toLowerCase()+'+'+geoState.toLowerCase()+'+'+geoCountry.toLowerCase(),
-			function (error, response, body) {
-			if (!error && response.statusCode === 200) {
+// 	if(!city) {
+// 		renderErrorResponse("you have not told strava where you live. Go to Strava > Settings > Profile and enter your address, then try again.");
+// 	} else {
+// 		request('http://maps.google.com/maps/api/geocode/json?address='+city.toLowerCase()+'+'+geoState.toLowerCase()+'+'+geoCountry.toLowerCase(),
+// 			function (error, response, body) {
+// 			if (!error && response.statusCode === 200) {
 
-				var resp = JSON.parse(body);
-				var result = resp && resp.results && resp.results[0] && resp.results[0].geometry && resp.results[0].geometry.viewport || null;
+// 				var resp = JSON.parse(body);
+// 				var result = resp && resp.results && resp.results[0] && resp.results[0].geometry && resp.results[0].geometry.viewport || null;
 
-				if(result) {
-					coordinates = result;
-					getSegmentsForGeoBounds(coordinates);
-				} else {
-					renderErrorResponse("No location matched. Go to Strava > Settings > Profile and check your address is correct.");
-				}
-			}
-		});
-	}
-}
+// 				if(result) {
+// 					coordinates = result;
+// 					getSegmentsForGeoBounds(coordinates);
+// 				} else {
+// 					renderErrorResponse("No location matched. Go to Strava > Settings > Profile and check your address is correct.");
+// 				}
+// 			}
+// 		});
+// 	}
+// }
 
 
 /**
@@ -296,27 +318,27 @@ function getCoordinatesFromGeoLocation (location) {
  *
  * @param  {object} SW and NE lat/long in object notation
  */
-function getSegmentsForGeoBounds (coordinates) {
-	console.log("::: getSegmentsForGeoBounds", coordinates);
+// function getSegmentsForGeoBounds (coordinates) {
+// 	console.log("::: getSegmentsForGeoBounds", coordinates);
 
-	strava.segments.explore({
-		"access_token": accessToken,
-		'bounds': coordinates.southwest.lat+','+coordinates.southwest.lng+','+coordinates.northeast.lat+','+coordinates.northeast.lng
-	},function(err,payload) {
-	    if(!err && apiRequestWithinRateLimit(payload)) {
-	        if(payload.segments.length > 0) {
-		        payload.segments.forEach(function (item) {
-		        	lookupAthletesForSpecifiedSegment(item.id);
-		        });
+// 	strava.segments.explore({
+// 		"access_token": accessToken,
+// 		'bounds': coordinates.southwest.lat+','+coordinates.southwest.lng+','+coordinates.northeast.lat+','+coordinates.northeast.lng
+// 	},function(err,payload) {
+// 	    if(!err && apiRequestWithinRateLimit(payload)) {
+// 	        if(payload.segments.length > 0) {
+// 		        payload.segments.forEach(function (item) {
+// 		        	lookupAthletesForSpecifiedSegment(item.id);
+// 		        });
 
-	        } else {
-	        	renderErrorResponse("No Strava segments were found near your location, that sucks..");
-	        }
-	    } else {
-	        renderErrorResponse(err);
-	    }
-	});
-}
+// 	        } else {
+// 	        	renderErrorResponse("No Strava segments were found near your location, that sucks..");
+// 	        }
+// 	    } else {
+// 	        renderErrorResponse(err);
+// 	    }
+// 	});
+// }
 
 /**
  * @description for a segment lookup the leaderboard of
@@ -324,22 +346,26 @@ function getSegmentsForGeoBounds (coordinates) {
  *
  * @param  {integer} segmentId
  */
-function lookupAthletesForSpecifiedSegment (segmentId) {
+function lookupAthletesForSpecifiedSegment(segmentId, athleteBio) {
 
-	console.log("::: lookupAthletesForSpecifiedSegment", segmentId);
+	console.log("::: lookupAthletesForSpecifiedSegment START", segmentId);
 
 	strava.segments.listLeaderboard({
-		"access_token": accessToken,
+		"access_token": athleteBio.accessToken,
 		"id": segmentId,
 		"gender": "M",
 		"following": false,
 		"page": 1
-	},function(err,payload) {
+	}, function(err,payload) {
 
 		if(!err && apiRequestWithinRateLimit(payload)) {
 		    if(payload.entries.length > 0) {
-		    	payload.entries.forEach(function (item, i) {
-					filterAthletesBasedOnAddress(item.athlete_id);
+		    	payload.entries.forEach(function (item, index) {
+					if (index < 1) {
+						console.log('::lookupAthletesForSpecifiedSegment:item:::', item);
+						filterAthletesBasedOnAddress(item.athlete_name, athleteBio);
+					}
+					
 		    	});
 			}
 		}
@@ -355,14 +381,14 @@ function lookupAthletesForSpecifiedSegment (segmentId) {
  *
  * @param {integer} athleteId
  */
-function filterAthletesBasedOnAddress (athleteIdentifier) {
+function filterAthletesBasedOnAddress(athleteIdentifier, athleteBio) {
 
-	console.log("::: filterAthletesBasedOnAddress", athleteIdentifier, athleteId);
+	console.log("::: filterAthletesBasedOnAddress START", athleteIdentifier, athleteBio);
 
 	if(athleteIdentifier) {
 		// Remove duplicate athletes
 		if(athletesCloseBy.indexOf(athleteIdentifier) !== -1 ||
-			athleteFriends.indexOf(athleteId) !== -1 ||
+			athleteFriends.indexOf(athleteBio.id) !== -1 ||
 		 	athleteIdentifier == athleteId) {
 
 			return false;
@@ -371,9 +397,13 @@ function filterAthletesBasedOnAddress (athleteIdentifier) {
 		athletesCloseBy.push(athleteIdentifier);
 
 		strava.athletes.get({
-			"access_token": accessToken,
-			"id": athleteIdentifier
+			"access_token": athleteBio.accessToken,
+			"name": athleteIdentifier,
+			"firstname": "Slopey",
+			"lastname": "S.",
+			"id": null
 		},function(err,payload) {
+			console.log('filterAthletesBasedOnAddress RESP::payload::::', err, payload);
 		    if(!err && apiRequestWithinRateLimit(payload)) {
 
 		    	var athleteCity = payload && payload.city && payload.city.toLowerCase().replace(" ", "+") || "";

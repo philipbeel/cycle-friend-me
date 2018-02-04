@@ -346,6 +346,7 @@ function apiRequestWithinRateLimit (payload) {
  *
  * @param  {integer} segmentId
  */
+// @todo: get athletes from a segment leaderboard without thier ID's
 function lookupAthletesForSpecifiedSegment(segmentId, athleteBio) {
 
 	console.log("::: lookupAthletesForSpecifiedSegment START", segmentId);
